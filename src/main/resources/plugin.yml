@@ -1,0 +1,6 @@
+main: com.github.tpgamesnl.runtimeskriptaddonpatcher.RuntimeSkriptAddonPatcher
+name: RuntimeSkriptAddonPatcher
+version: 1.0-SNAPSHOT
+api-version: 1.13
+author: TPGamesNL
+loadbefore: [Skript]
