@@ -40,10 +40,4 @@ public class Util {
         return byteArrayOutputStream.toByteArray();
     }
 
-    public static void exitError(Throwable t, String error) {
-        System.err.println(error);
-        t.printStackTrace();
-        System.exit(-1);
-    }
-
 }

@@ -2,37 +2,34 @@ package com.github.tpgamesnl.runtimeskriptaddonpatcher;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
-import java.lang.management.ManagementFactory;
+import java.util.jar.JarFile;
 
 public class RuntimeSkriptAddonPatcher extends JavaPlugin {
 
-    @Override
-    public void onEnable() {
-        try {
-            startAgent();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+    static {
+        //noinspection ConstantConditions
+        for (File file : new File("plugins").listFiles()) {
+            if (file.isFile() && file.getName().endsWith(".jar")) {
+                try {
+                    JarFile jarFile = new JarFile(file);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                    boolean changed = SkriptAddonPatcher.convertJar(jarFile, baos);
+                    if (changed) {
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        fileOutputStream.write(baos.toByteArray());
+                        fileOutputStream.close();
+                        System.out.println("[RuntimeSkriptAddonPatcher] File " + file + " changed!");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        getLogger().info("Attached");
-    }
-
-    public void startAgent() throws IOException, InterruptedException {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        String pid = name.substring(0, name.indexOf('@'));
-        getLogger().info("Attaching to pid=" + pid);
-        String path = getFile().getCanonicalPath();
-
-        Process process = new ProcessBuilder("java", "-jar", path, path, pid)
-                .redirectError(Redirect.INHERIT)
-                .redirectOutput(Redirect.INHERIT)
-                .start();
-        process.waitFor();
-
-        int exitValue;
-        if ((exitValue = process.exitValue()) != 0)
-            throw new IllegalStateException("Exit value non-zero: " + exitValue);
     }
 
 }
